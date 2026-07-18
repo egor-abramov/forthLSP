@@ -1,0 +1,10 @@
+<idea-plugin>
+    <id>ForthLSP</id>
+    <name>Forth LSP</name>
+    <vendor>Egor Abramov</vendor>
+
+    <depends>com.intellij.modules.lsp</depends>
+    <extensions defaultExtensionNs="com.intellij">
+        <platform.lsp.integrationProvider implementation="forthLSP.ForthLspServerSupportProvider"/>
+    </extensions>
+</idea-plugin>

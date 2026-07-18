@@ -1,0 +1,43 @@
+cabal-version:      3.0
+
+name:               server
+
+version:            0.1.0.0
+
+license:            BSD-3-Clause
+
+license-file:       LICENSE
+
+author:             Egor Abramov
+
+maintainer:         76647543+0abramov0@users.noreply.github.com
+
+build-type:         Simple
+
+extra-doc-files:    CHANGELOG.md
+
+common warnings
+    ghc-options: -Wall
+
+executable server
+    import:           warnings
+
+    main-is:          Main.hs
+
+    other-modules:    Syntax,
+                      Parser,
+                      State,
+                      Analyzer
+
+    build-depends:    base ^>=4.18.3.0,
+                      lsp,
+                      lsp-types,
+                      text,
+                      lens,
+                      megaparsec,
+                      containers,
+                      stm
+
+    hs-source-dirs:   app, src
+
+    default-language: Haskell2010
