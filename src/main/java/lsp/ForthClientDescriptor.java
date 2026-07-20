@@ -1,4 +1,4 @@
-package forthLSP;
+package lsp;
 
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.openapi.project.Project;

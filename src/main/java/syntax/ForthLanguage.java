@@ -1,13 +1,11 @@
-package forthLSP;
+package syntax;
 
 import com.intellij.lang.Language;
-import org.jetbrains.annotations.NonNls;
-import org.jetbrains.annotations.NotNull;
 
 public class ForthLanguage extends Language {
-    public static ForthLanguage INSTANCE = new ForthLanguage("forth");
+    public static ForthLanguage INSTANCE = new ForthLanguage();
 
-    protected ForthLanguage(@NonNls @NotNull String ID) {
-        super(ID);
+    private ForthLanguage() {
+        super("forth");
     }
 }

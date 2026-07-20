@@ -4,7 +4,17 @@
     <vendor>Egor Abramov</vendor>
 
     <depends>com.intellij.modules.lsp</depends>
+
     <extensions defaultExtensionNs="com.intellij">
-        <platform.lsp.integrationProvider implementation="forthLSP.ForthLspServerSupportProvider"/>
+        <platform.lsp.integrationProvider implementation="lsp.ForthLspServerSupportProvider"/>
+
+        <fileType name="Forth File"
+                  implementationClass="syntax.ForthFileType"
+                  fieldName="INSTANCE"
+                  language="forth"
+                  extensions="fth"/>
+
+        <lang.syntaxHighlighterFactory language="forth"
+                                       implementationClass="syntax.ForthSyntaxHighlighterFactory"/>
     </extensions>
 </idea-plugin>
