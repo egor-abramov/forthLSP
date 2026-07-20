@@ -155,6 +155,7 @@ pCallIdentifier = CallIdentifier <$> pIdentifier
 pExecToken :: Parser Instruction
 pExecToken = do
   _ <- string "'"
+  space1
   ExecToken <$> pIdentifier
 
 pExecuteOp :: Parser Instruction
@@ -186,6 +187,8 @@ pCondExp = do
 pInstruction :: Parser Instruction
 pInstruction =
   pLitNumber
+    <|> pExecToken
+    <|> pExecuteOp
     <|> pMathOp
     <|> pLogicOp
     <|> pStackOp
@@ -195,8 +198,6 @@ pInstruction =
     <|> pLoopExp
     <|> pCondExp
     <|> pCallIdentifier
-    <|> pExecToken
-    <|> pExecuteOp
 
 pVarDef :: Parser VarDef
 pVarDef = pVarDefNum <|> pVarDefString <|> pVarDefArray

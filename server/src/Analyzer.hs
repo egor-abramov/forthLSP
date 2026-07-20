@@ -1,17 +1,23 @@
 module Analyzer where
 
 import Control.Monad (foldM)
-import Data.Text (Text)
 import qualified Data.Map as M
+import Data.Text (Text)
 import Syntax
 
-type Env = M.Map Text Contract
+data SymbolInfo = ProcSymbol Contract | VarSymbol
+
+type Env = M.Map Text SymbolInfo
 
 buildEnv :: Program -> Env
-buildEnv terms = M.fromList
-  [ (procName p, contract p)
-  | Located _ (TermProcedure p) <- terms
-  ]
+buildEnv terms = M.fromList $ concatMap extract terms
+  where
+    extract (Located _ (TermProcedure p)) = [(procName p, ProcSymbol (contract p))]
+    extract (Located _ (TermVar v)) = case v of
+      VarDefNum name -> [(name, VarSymbol)]
+      VarDefString _ name -> [(name, VarSymbol)]
+      VarDefArray name -> [(name, VarSymbol)]
+    extract _ = []
 
 stackEffect :: Instruction -> (Int, Int)
 stackEffect (MathOp _) = (2, 1)
@@ -27,6 +33,7 @@ stackEffect (IoOp IoRead) = (0, 1)
 stackEffect (IoOp _) = (1, 0)
 stackEffect (LitNumber _) = (0, 1)
 stackEffect (ExecToken _) = (0, 1)
+stackEffect ExecuteOp = (1, 0)
 stackEffect _ = (0, 0)
 
 data AnalyzeError
@@ -42,13 +49,14 @@ analyzeInstruction env depth (Located loc instruction) =
     CondExp ifBranch elseBranch -> analyzeCond env loc depth ifBranch elseBranch
     LoopExp body -> analyzeLoop env loc depth body
     CallIdentifier name ->
-        case M.lookup name env of
-            Just (Contract t p) ->
-                if depth < t
-                    then Left $ InstructionUnderflow loc t depth instruction
-                    else Right $ depth - t + p
-            Nothing -> Left $ UndefinedProcedure loc name
-
+      case M.lookup name env of
+        Just (ProcSymbol (Contract t p)) ->
+          if depth < t
+            then Left $ InstructionUnderflow loc t depth instruction
+            else Right $ depth - t + p
+        Just VarSymbol ->
+          Right $ depth + 1
+        Nothing -> Left $ UndefinedProcedure loc name
     _ ->
       let (t, p) = stackEffect instruction
        in if depth < t
@@ -78,31 +86,46 @@ analyzeLoop env loc depth body = do
     then Right depth
     else Left $ LoopMismatch loc delta
 
+containsExecute :: [Located Instruction] -> Bool
+containsExecute = any check
+  where
+    check (Located _ instr) = case instr of
+      ExecuteOp -> True
+      CondExp ifBody elseBody ->
+        containsExecute ifBody || maybe False containsExecute elseBody
+      LoopExp body -> containsExecute body
+      _ -> False
+
 analyzeProcedure :: Env -> Range -> ProcedureDef -> Either AnalyzeError Int
 analyzeProcedure env loc procedure = do
   let c = contract procedure
       t = takes c
       p = puts c
       name = procName procedure
+      isUnsafe = containsExecute (procBody procedure)
+
   finalDepth <- foldM (analyzeInstruction env) t (procBody procedure)
-  if finalDepth == p
-    then Right finalDepth
-    else Left $ ContractMismatch loc name p finalDepth
+  if isUnsafe
+    then Right p
+    else do
+      if finalDepth == p
+        then Right finalDepth
+        else Left $ ContractMismatch loc name p finalDepth
 
 analyzeTerm :: Env -> Int -> Located Term -> Either AnalyzeError Int
 analyzeTerm env depth (Located loc term) = do
-    case term of
-        TermProcedure proc -> do
-            _ <- analyzeProcedure env loc proc
-            Right depth
-        TermInstruction instr -> do
-            analyzeInstruction env depth (Located loc instr)
-        TermVar _ -> do
-            Right depth
-        TermImport _ -> do
-            Right depth
+  case term of
+    TermProcedure proc -> do
+      _ <- analyzeProcedure env loc proc
+      Right depth
+    TermInstruction instr -> do
+      analyzeInstruction env depth (Located loc instr)
+    TermVar _ -> do
+      Right depth
+    TermImport _ -> do
+      Right depth
 
 analyzeProgram :: Program -> Either AnalyzeError Int
 analyzeProgram program = do
-    let env = buildEnv program
-    foldM (analyzeTerm env) 0 program
+  let env = buildEnv program
+  foldM (analyzeTerm env) 0 program

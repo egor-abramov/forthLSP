@@ -2,6 +2,9 @@
 {-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+-- TODO: import resolve
+-- TODO: tests
+
 module Main where
 
 import Analyzer
