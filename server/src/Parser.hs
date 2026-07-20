@@ -5,10 +5,10 @@ module Parser where
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Void (Void)
+import Syntax
 import Text.Megaparsec
 import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
-import Syntax
 
 type Parser = Parsec Void Text
 
@@ -116,22 +116,22 @@ pFlagOp =
 
 pContract :: Parser Contract
 pContract = do
-    _ <- string "("
-    space
-    t <- L.decimal
-    space
-    _ <- string "->"
-    space
-    p <- L.decimal
-    _ <- string ")"
-    return $ Contract t p
-
+  _ <- string "("
+  space
+  t <- L.decimal
+  space
+  _ <- string "->"
+  space
+  p <- L.decimal
+  _ <- string ")"
+  return $ Contract t p
 
 pProcedureDef :: Parser ProcedureDef
 pProcedureDef = do
   _ <- string ":"
   space1
   name <- pIdentifier
+  space
   cont <- pContract
   space1
   body <- manyTill (withLocation pInstruction <* space) (string ";")
@@ -145,7 +145,7 @@ pLoopExp = do
   return $ LoopExp body
 
 pLitNumber :: Parser Instruction
-pLitNumber = do
+pLitNumber = try $ do
   val <- L.signed (return ()) L.decimal
   return $ LitNumber val
 
@@ -186,6 +186,7 @@ pCondExp = do
 pInstruction :: Parser Instruction
 pInstruction =
   pLitNumber
+    <|> pMathOp
     <|> pLogicOp
     <|> pStackOp
     <|> pFlagOp
@@ -193,7 +194,6 @@ pInstruction =
     <|> pIoOp
     <|> pLoopExp
     <|> pCondExp
-    <|> pMathOp
     <|> pCallIdentifier
     <|> pExecToken
     <|> pExecuteOp

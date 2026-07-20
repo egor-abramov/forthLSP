@@ -20,6 +20,7 @@ public class ForthClientDescriptor extends LspClientDescriptor {
     @NotNull
     @Override
     public GeneralCommandLine createCommandLine() {
-        return new GeneralCommandLine("C:/Users/HONOR/Documents/haskell/haskellProject/dist-newstyle/build/x86_64-windows/ghc-9.6.7/haskellProject-0.1.0.0/x/haskellProject/build/haskellProject/haskellProject.exe", "--stdio");
+        String serverPath = System.getProperty("forthLsp.serverPath");
+        return new GeneralCommandLine(serverPath, "--stdio");
     }
 }
