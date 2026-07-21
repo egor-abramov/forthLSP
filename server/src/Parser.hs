@@ -12,6 +12,12 @@ import qualified Text.Megaparsec.Char.Lexer as L
 
 type Parser = Parsec Void Text
 
+wordBoundary :: Parser ()
+wordBoundary = notFollowedBy (alphaNumChar <|> char '_')
+
+keyword :: Text -> Parser Text
+keyword kw = try (string' kw <* wordBoundary)
+
 withLocation :: Parser a -> Parser (Located a)
 withLocation parser = do
   startPos <- getSourcePos
@@ -30,7 +36,7 @@ withLocation parser = do
 pIdentifier :: Parser Text
 pIdentifier = do
   ident <- some (alphaNumChar <|> char '_')
-  return $ T.pack ident
+  return $ T.toLower $ T.pack ident
 
 pStringLiteral :: Parser Text
 pStringLiteral = do
@@ -41,13 +47,13 @@ pStringLiteral = do
 
 pVarDefNum :: Parser VarDef
 pVarDefNum = do
-  _ <- string "var" <* notFollowedBy alphaNumChar
+  _ <- keyword "var"
   space1
   VarDefNum <$> pIdentifier
 
 pVarDefString :: Parser VarDef
 pVarDefString = do
-  _ <- string "string" <* notFollowedBy alphaNumChar
+  _ <- keyword "string"
   space1
   strVal <- pStringLiteral
   space1
@@ -55,13 +61,13 @@ pVarDefString = do
 
 pVarDefArray :: Parser VarDef
 pVarDefArray = do
-  _ <- string "array" <* notFollowedBy alphaNumChar
+  _ <- keyword "array"
   space1
   VarDefArray <$> pIdentifier
 
 pImportExp :: Parser ImportExp
 pImportExp = do
-  _ <- string "import" <* notFollowedBy alphaNumChar
+  _ <- keyword "import"
   space1
   ImportExp <$> pIdentifier
 
@@ -73,37 +79,37 @@ pMathOp =
       MathOp Mul <$ string "*",
       MathOp Div <$ string "/",
       MathOp Mod <$ string "%",
-      MathOp Cells <$ (string "cells" <* notFollowedBy alphaNumChar)
+      MathOp Cells <$ keyword "cells"
     ]
 
 pLogicOp :: Parser Instruction
 pLogicOp =
   choice
-    [ LogicOp And <$ (string "and" <* notFollowedBy alphaNumChar),
-      LogicOp Not <$ (string "not" <* notFollowedBy alphaNumChar)
+    [ LogicOp And <$ keyword "and",
+      LogicOp Not <$ keyword "not"
     ]
 
 pStackOp :: Parser Instruction
 pStackOp =
   choice
-    [ StackOp Dup <$ (string "dup" <* notFollowedBy alphaNumChar),
-      StackOp Drop <$ (string "drop" <* notFollowedBy alphaNumChar),
-      StackOp Swap <$ (string "swap" <* notFollowedBy alphaNumChar)
+    [ StackOp Dup <$ keyword "dup",
+      StackOp Drop <$ keyword "drop",
+      StackOp Swap <$ keyword "swap"
     ]
 
 pMemOp :: Parser Instruction
 pMemOp =
   choice
-    [ MemOp MemWrite <$ string "!",
-      MemOp MemRead <$ string "@"
+    [ MemOp MemWrite <$ keyword "!",
+      MemOp MemRead <$ keyword "@"
     ]
 
 pIoOp :: Parser Instruction
 pIoOp =
   choice
-    [ IoOp IoRead <$ (string "read" <* notFollowedBy alphaNumChar),
-      IoOp IoNumWrite <$ string ".",
-      IoOp IoCharWrite <$ (string "emit" <* notFollowedBy alphaNumChar)
+    [ IoOp IoRead <$ keyword "read",
+      IoOp IoNumWrite <$ keyword ".",
+      IoOp IoCharWrite <$ keyword "emit"
     ]
 
 pFlagOp :: Parser Instruction
@@ -139,7 +145,7 @@ pProcedureDef = do
 
 pLoopExp :: Parser Instruction
 pLoopExp = do
-  _ <- string "loop" <* notFollowedBy alphaNumChar
+  _ <- keyword "loop"
   space1
   body <- manyTill (withLocation pInstruction <* space) (string "endloop" <* notFollowedBy alphaNumChar)
   return $ LoopExp body
@@ -160,28 +166,28 @@ pExecToken = do
 
 pExecuteOp :: Parser Instruction
 pExecuteOp = do
-  _ <- string "execute" <* notFollowedBy alphaNumChar
+  _ <- keyword "execute"
   return ExecuteOp
 
 pCondExp :: Parser Instruction
 pCondExp = do
-  _ <- string "if" <* notFollowedBy alphaNumChar
+  _ <- keyword "if"
   space1
   ifBody <-
     manyTill
       (withLocation pInstruction <* space)
-      (lookAhead ((string "else" <* notFollowedBy alphaNumChar) <|> (string "then" <* notFollowedBy alphaNumChar)))
+      (lookAhead (keyword "else" <|>  keyword "then"))
   elseBody <- parseElse <|> parseThen
   return $ CondExp ifBody elseBody
   where
     parseElse = do
-      _ <- string "else" <* notFollowedBy alphaNumChar
+      _ <- keyword "else"
       space1
       body <- manyTill (withLocation pInstruction <* space) (string "then")
       return $ Just body
 
     parseThen = do
-      _ <- string "then" <* notFollowedBy alphaNumChar
+      _ <- keyword "then"
       return Nothing
 
 pInstruction :: Parser Instruction
@@ -227,3 +233,6 @@ parseFile fileName content =
   case parse pProgram fileName content of
     Left err -> Left (errorBundlePretty err)
     Right program -> Right program
+
+extractImports :: Program -> [Text]
+extractImports terms = [path | Located _ (TermImport (ImportExp path)) <- terms]

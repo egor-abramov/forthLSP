@@ -28,7 +28,8 @@ executable server
                       Parser,
                       State,
                       Analyzer,
-                      Diagnostics
+                      Diagnostics,
+                      Loader
 
     build-depends:    base ^>=4.18.3.0,
                       lsp,
@@ -37,7 +38,9 @@ executable server
                       lens,
                       megaparsec,
                       containers,
-                      stm
+                      stm,
+                      directory,
+                      filepath
 
     hs-source-dirs:   app, src
 

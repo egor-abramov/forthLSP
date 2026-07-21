@@ -20,6 +20,7 @@ buildEnv terms = M.fromList $ concatMap extract terms
     extract _ = []
 
 stackEffect :: Instruction -> (Int, Int)
+stackEffect (MathOp Cells) = (1, 1)
 stackEffect (MathOp _) = (2, 1)
 stackEffect (LogicOp Not) = (1, 1)
 stackEffect (LogicOp _) = (2, 1)
@@ -125,7 +126,8 @@ analyzeTerm env depth (Located loc term) = do
     TermImport _ -> do
       Right depth
 
-analyzeProgram :: Program -> Either AnalyzeError Int
-analyzeProgram program = do
-  let env = buildEnv program
+analyzeProgram :: Env -> Program -> Either AnalyzeError Int
+analyzeProgram importedEnv program = do
+  let localEnv = buildEnv program
+      env = M.union localEnv importedEnv
   foldM (analyzeTerm env) 0 program

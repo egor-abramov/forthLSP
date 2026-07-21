@@ -2,7 +2,6 @@
 {-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- TODO: import resolve
 -- TODO: tests
 
 module Main where
@@ -18,6 +17,7 @@ import Language.LSP.Server
 import Language.LSP.VFS
 import Parser
 import State
+import Loader (loadImports, findProjectRoot)
 import qualified Syntax as S
 
 processDocument :: ServerState -> Uri -> T.Text -> LspM () ()
@@ -34,12 +34,20 @@ processDocument state uri text = do
     Right program -> do
       liftIO $ updateDocument state uri text (Just program)
 
-      case analyzeProgram program of
+      projectPath <- liftIO $ findProjectRoot fileName
+
+      let imports = extractImports program
+      (importedEnv, importErrs) <- liftIO $ loadImports projectPath imports
+
+      let fallbackRange = S.Range (S.Position 1 1) (S.Position 1 2)
+          importDiags = map (mkDiagnostic fallbackRange . T.pack) importErrs
+
+      case analyzeProgram importedEnv program of
         Left analyzeError -> do
           let diag = convertAnalyzeError analyzeError
-          sendDiagnostics uri [diag]
+          sendDiagnostics uri (diag : importDiags)
         Right _ -> do
-          sendDiagnostics uri []
+          sendDiagnostics uri importDiags
 
 sendDiagnostics :: Uri -> [Diagnostic] -> LspM () ()
 sendDiagnostics uri diags = do
@@ -60,7 +68,9 @@ serverHandlers state =
           Nothing -> pure (),
       notificationHandler SMethod_Initialized $ \_msg -> do
         pure (),
-     notificationHandler SMethod_TextDocumentDidSave $ \_msg -> do
+      notificationHandler SMethod_TextDocumentDidSave $ \_msg -> do
+        pure (),
+      notificationHandler SMethod_TextDocumentDidClose $ \_msg -> do
         pure ()
     ]
 
