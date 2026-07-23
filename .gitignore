@@ -3,5 +3,4 @@
 .intellijPlatform
 .run
 build
-server/dist-newstyle
 dist-newstyle

@@ -1,0 +1,16 @@
+code: |-
+  : func (0 -> 0)
+    1 1 +
+  ;
+expected:
+- message: 'Contract violation in procedure ''func'': expected 0 elements, but got
+    1.'
+  range:
+    end:
+      character: 1
+      line: 2
+    start:
+      character: 0
+      line: 0
+  severity: 1
+  source: forth-analyzer

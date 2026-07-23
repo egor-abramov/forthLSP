@@ -1,0 +1,12 @@
+code: import doesnt_existing_lib
+expected:
+- message: 'Library not found: C:\Users\HONOR\IdeaProjects\forthLSP\server\test\libs\doesnt_existing_lib.fth'
+  range:
+    end:
+      character: 1
+      line: 0
+    start:
+      character: 0
+      line: 0
+  severity: 1
+  source: forth-analyzer

@@ -45,3 +45,20 @@ executable server
     hs-source-dirs:   app, src
 
     default-language: Haskell2010
+
+test-suite server-test
+      type:             exitcode-stdio-1.0
+      main-is:          Main.hs
+      hs-source-dirs:   test
+      default-language: Haskell2010
+      build-depends: base ^>=4.18.3.0,
+                     lsp-test,
+                     tasty,
+                     tasty-golden,
+                     lsp-types,
+                     aeson,
+                     bytestring,
+                     filepath,
+                     text,
+                     process,
+                     yaml

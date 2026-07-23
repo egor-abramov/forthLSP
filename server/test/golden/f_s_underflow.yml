@@ -1,0 +1,15 @@
+code: |-
+  : func (1 -> 1)
+    swap
+  ;
+expected:
+- message: 'Stack underflow: expected 2 elements, but got 1.'
+  range:
+    end:
+      character: 6
+      line: 1
+    start:
+      character: 2
+      line: 1
+  severity: 1
+  source: forth-analyzer

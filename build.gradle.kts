@@ -48,12 +48,12 @@ tasks.register<Exec>("buildServer") {
     group = "build"
     description = "Builds the LSP server"
     workingDir = file("server")
-    commandLine("cabal", "build", "--builddir=server/dist-newstyle")
+    commandLine("cabal", "build")
 }
 
 tasks.named<JavaExec>("runIde") {
     dependsOn("buildServer")
 
-    val exePath = file("server/dist-newstyle/build/x86_64-windows/ghc-9.6.7/server-0.1.0.0/x/server/build/server/server.exe").absolutePath //[cite: 3]
+    val exePath = file("dist-newstyle/build/x86_64-windows/ghc-9.6.7/server-0.1.0.0/x/server/build/server/server.exe").absolutePath //[cite: 3]
     systemProperty("forthLsp.serverPath", exePath)
 }
