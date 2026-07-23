@@ -43,15 +43,27 @@ jobs:
       - name: Run Tests
         run: cabal test server-test
 
+      - name: Upload Haskell Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: haskell-server-binary
+          path: dist-newstyle/build/x86_64-windows/ghc-9.6.7/server-0.1.0.0/x/server/build/server/server
 
 
   intellij-plugin:
     name: Build IntelliJ Plugin
     runs-on: ubuntu-latest
+    needs: haskell-server
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Download Haskell Binary
+        uses: actions/download-artifact@v4
+        with:
+          name: haskell-server-binary
+          path: src/main/resources/bin/
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -68,7 +80,6 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew buildPlugin
-
 
       - name: Upload Plugin Artifact
         uses: actions/upload-artifact@v4

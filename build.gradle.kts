@@ -59,6 +59,6 @@ tasks.register<Exec>("buildServer") {
 tasks.named<JavaExec>("runIde") {
     dependsOn("buildServer")
 
-    val exePath = file("dist-newstyle/build/x86_64-windows/ghc-9.6.7/server-0.1.0.0/x/server/build/server/server.exe").absolutePath //[cite: 3]
+    val exePath = file("dist-newstyle/build/x86_64-windows/ghc-9.6.7/server-0.1.0.0/x/server/build/server/server.exe").absolutePath
     systemProperty("forthLsp.serverPath", exePath)
 }
