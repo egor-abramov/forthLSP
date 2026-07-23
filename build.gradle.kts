@@ -17,8 +17,13 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdea("2026.1.4")
-//        local(file("C:/Program Files/JetBrains/IntelliJ IDEA 2026.1.4"))
+        val isCI = System.getenv("CI").toBoolean()
+
+        if (isCI) {
+            intellijIdea("2026.1.4")
+        } else {
+            local(file("C:/Program Files/JetBrains/IntelliJ IDEA 2026.1.4"))
+        }
     }
 }
 
