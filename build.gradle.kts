@@ -62,3 +62,9 @@ tasks.named<JavaExec>("runIde") {
     val exePath = file("dist-newstyle/build/x86_64-windows/ghc-9.6.7/server-0.1.0.0/x/server/build/server/server.exe").absolutePath
     systemProperty("forthLsp.serverPath", exePath)
 }
+
+tasks.prepareSandbox {
+    from("server-bin") {
+        into("${project.name}/bin")
+    }
+}

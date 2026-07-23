@@ -9,7 +9,10 @@ on:
 jobs:
   haskell-server:
     name: Build & Test Haskell Server
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - name: Checkout repository
@@ -20,16 +23,6 @@ jobs:
         with:
           ghc-version: '9.6.7'
           cabal-version: 'latest'
-
-      - name: Cache Cabal store
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cabal/store
-            dist-newstyle
-          key: ${{ runner.os }}-cabal-${{ hashFiles('**/server.cabal', '**/cabal.project') }}
-          restore-keys: |
-            ${{ runner.os }}-cabal-
 
       - name: Update Cabal index
         run: cabal update
@@ -43,11 +36,26 @@ jobs:
       - name: Run Tests
         run: cabal test server-test
 
-      - name: Upload Haskell Binary Artifact
+      - name: Package Binary
+        shell: bash
+        run: |
+          mkdir -p server-bin
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            BIN_PATH=$(find dist-newstyle -name "server.exe" -type f | head -n 1)
+            cp "$BIN_PATH" server-bin/server-windows.exe
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            BIN_PATH=$(find dist-newstyle -name "server" -type f | head -n 1)
+            cp "$BIN_PATH" server-bin/server-macos
+          else
+            BIN_PATH=$(find dist-newstyle -name "server" -type f | head -n 1)
+            cp "$BIN_PATH" server-bin/server-linux
+          fi
+
+      - name: Upload Binary Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: haskell-server-binary
-          path: dist-newstyle/build/x86_64-windows/ghc-9.6.7/server-0.1.0.0/x/server/build/server/server
+          name: haskell-server-${{ matrix.os }}
+          path: server-bin/
 
 
   intellij-plugin:
@@ -59,11 +67,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download Haskell Binary
+      - name: Download Windows Binary
         uses: actions/download-artifact@v4
         with:
-          name: haskell-server-binary
-          path: src/main/resources/bin/
+          name: haskell-server-windows-latest
+          path: server-bin/
+
+      - name: Download Linux Binary
+        uses: actions/download-artifact@v4
+        with:
+          name: haskell-server-linux-latest
+          path: server-bin/
+
+      - name: Download macOS Binary
+        uses: actions/download-artifact@v4
+        with:
+          name: haskell-server-macos-latest
+          path: server-bin/
 
       - name: Setup Java
         uses: actions/setup-java@v4
