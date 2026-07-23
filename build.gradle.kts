@@ -17,8 +17,8 @@ repositories {
 
 dependencies {
     intellijPlatform {
-//        intellijIdeaUltimate("2026.1")
-        local(file("C:/Program Files/JetBrains/IntelliJ IDEA 2026.1.4"))
+        intellijIdea("2026.1.4")
+//        local(file("C:/Program Files/JetBrains/IntelliJ IDEA 2026.1.4"))
     }
 }
 
