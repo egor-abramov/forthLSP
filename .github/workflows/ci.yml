@@ -85,7 +85,7 @@ jobs:
       - name: Download Linux Binary
         uses: actions/download-artifact@v4
         with:
-          name: haskell-server-linux-latest
+          name: haskell-server-ubuntu-latest
           path: server-bin/
 
       - name: Download macOS Binary
