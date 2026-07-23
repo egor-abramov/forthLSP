@@ -176,7 +176,7 @@ pCondExp = do
   ifBody <-
     manyTill
       (withLocation pInstruction <* space)
-      (lookAhead (keyword "else" <|>  keyword "then"))
+      (lookAhead (keyword "else" <|> keyword "then"))
   elseBody <- parseElse <|> parseThen
   return $ CondExp ifBody elseBody
   where

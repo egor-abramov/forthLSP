@@ -2,7 +2,8 @@
 {-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- TODO: tests
+-- TODO: server test
+-- TODO: docs
 
 module Main where
 
@@ -15,9 +16,9 @@ import Language.LSP.Protocol.Message
 import Language.LSP.Protocol.Types
 import Language.LSP.Server
 import Language.LSP.VFS
+import Loader (findProjectRoot, loadImports)
 import Parser
 import State
-import Loader (loadImports, findProjectRoot)
 import qualified Syntax as S
 
 processDocument :: ServerState -> Uri -> T.Text -> LspM () ()

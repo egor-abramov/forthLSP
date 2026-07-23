@@ -6,8 +6,8 @@ import Data.Maybe (mapMaybe)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Parser (parseFile)
-import System.Directory (doesFileExist, doesDirectoryExist)
-import System.FilePath ((<.>), (</>), takeDirectory)
+import System.Directory (doesDirectoryExist, doesFileExist)
+import System.FilePath (takeDirectory, (<.>), (</>))
 
 findProjectRoot :: FilePath -> IO FilePath
 findProjectRoot startPath = checkDir (takeDirectory startPath)
