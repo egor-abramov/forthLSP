@@ -1,6 +1,6 @@
 code: import doesnt_existing_lib
 expected:
-- message: 'Library not found: C:\Users\HONOR\IdeaProjects\forthLSP\server\test\libs\doesnt_existing_lib.fth'
+- message: 'Library not found: doesnt_existing_lib'
   range:
     end:
       character: 1

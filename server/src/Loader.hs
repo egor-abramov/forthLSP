@@ -35,7 +35,7 @@ loadSingleImport projectRoot moduleName = do
         Right program -> return (buildEnv program, Nothing)
         Left err -> return (M.empty, Just $ "Parse error in " ++ fileName ++ ".fth: " ++ err)
     else
-      return (M.empty, Just $ "Library not found: " ++ path)
+      return (M.empty, Just $ "Library not found: " ++ fileName)
 
 loadImports :: FilePath -> [T.Text] -> IO (Env, [String])
 loadImports projectRoot paths = do

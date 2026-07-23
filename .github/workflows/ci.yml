@@ -65,7 +65,9 @@ jobs:
           gradle-version: wrapper
 
       - name: Build Plugin
-        run: ./gradlew buildPlugin
+        run: |
+          chmod +x gradlew
+          ./gradlew buildPlugin
 
 
       - name: Upload Plugin Artifact
