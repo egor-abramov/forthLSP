@@ -23,6 +23,15 @@ jobs:
         with:
           ghc-version: '9.6.7'
           cabal-version: 'latest'
+          cache: true
+
+      - name: Cache project build artifacts
+        uses: actions/cache@v4
+        with:
+          path: dist-newstyle
+          key: ${{ runner.os }}-dist-${{ hashFiles('**/*.hs', '**/server.cabal') }}
+          restore-keys: |
+            ${{ runner.os }}-dist-
 
       - name: Update Cabal index
         run: cabal update
@@ -99,7 +108,7 @@ jobs:
       - name: Build Plugin
         run: |
           chmod +x gradlew
-          ./gradlew buildPlugin
+          ./gradlew buildPlugin --build-cache
 
       - name: Upload Plugin Artifact
         uses: actions/upload-artifact@v4

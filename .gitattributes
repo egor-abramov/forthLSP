@@ -1,0 +1,5 @@
+* text=auto eol=lf
+
+*.hs text eol=lf
+*.yml text eol=lf
+*.fth text eol=lf
