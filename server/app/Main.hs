@@ -2,9 +2,6 @@
 {-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- TODO: server test
--- TODO: docs
-
 module Main where
 
 import Analyzer
