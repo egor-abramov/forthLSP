@@ -1,18 +1,20 @@
 package lsp;
 
 import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.platform.lsp.api.LspClientDescriptor;
+import com.intellij.platform.lsp.api.LspServerDescriptor;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.nio.file.Path;
 
-public class ForthClientDescriptor extends LspClientDescriptor {
+public class ForthClientDescriptor extends LspServerDescriptor {
 
     public ForthClientDescriptor(@NotNull Project project) {
         super(project, "Forth");
@@ -43,6 +45,17 @@ public class ForthClientDescriptor extends LspClientDescriptor {
 
         PluginId pluginId = PluginId.getId("forth.lsp.plugin");
         var plugin = PluginManagerCore.getPlugin(pluginId);
+        File exeFile = getFile(plugin);
+
+        if (!exeFile.exists()) {
+            String errorMsg = "LSP executable not found at: " + exeFile.getAbsolutePath();
+            throw new RuntimeException(errorMsg);
+        }
+
+        return exeFile.getAbsolutePath();
+    }
+
+    private static @NonNull File getFile(IdeaPluginDescriptor plugin) {
         if (plugin == null) {
             throw new RuntimeException("Forth LSP Plugin not found");
         }
@@ -57,6 +70,6 @@ public class ForthClientDescriptor extends LspClientDescriptor {
         }
 
         Path binDir = plugin.getPluginPath().resolve("bin");
-        return binDir.resolve(executableName).toAbsolutePath().toString();
+        return binDir.resolve(executableName).toFile();
     }
 }

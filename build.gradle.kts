@@ -64,7 +64,15 @@ tasks.named<JavaExec>("runIde") {
 }
 
 tasks.prepareSandbox {
+    dependsOn("copyLocalServer")
     from("server-bin") {
         into("${project.name}/bin")
     }
+}
+
+tasks.register<Copy>("copyLocalServer") {
+    dependsOn("buildServer")
+    from(file("dist-newstyle/build/x86_64-windows/ghc-9.6.7/server-0.1.0.0/x/server/build/server/server.exe"))
+    into(file("server-bin"))
+    rename("server.exe", "server-windows.exe")
 }

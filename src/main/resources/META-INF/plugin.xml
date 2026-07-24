@@ -3,9 +3,11 @@
     <name>Forth LSP</name>
     <vendor>Egor Abramov</vendor>
 
+    <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lsp</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <platform.lsp.serverSupportProvider implementation="lsp.ForthLspServerSupportProvider"/>
         <platform.lsp.integrationProvider implementation="lsp.ForthLspServerSupportProvider"/>
 
         <fileType name="Forth File"
