@@ -64,7 +64,10 @@ tasks.named<JavaExec>("runIde") {
 }
 
 tasks.prepareSandbox {
-    dependsOn("copyLocalServer")
+    val isCI = System.getenv("CI").toBoolean()
+    if (!isCI) {
+        dependsOn("copyLocalServer")
+    }
     from("server-bin") {
         into("${project.name}/bin")
     }
