@@ -19,7 +19,7 @@ public class ForthFileType extends LanguageFileType {
 
     @Override
     public @NonNls @NotNull String getName() {
-        return "Forth file";
+        return "Forth File";
     }
 
     @Override
