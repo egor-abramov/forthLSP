@@ -47,8 +47,6 @@
 ```
 
 ## Тестирование
-Сервер покрыт e2e тестами, для клиента тестов нет, ибо лень.
-
 Код тестов [тут](https://github.com/egor-abramov/forthLSP/tree/main/server/test).
 
 Тестовые сценарии [тут](https://github.com/egor-abramov/forthLSP/tree/main/server/test/golden).
